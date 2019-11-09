@@ -8,11 +8,7 @@
 %define parse.assert
 
 %code requires {
-    #include <string>
-    #include <iostream>
     #include "token.h"
-
-    using namespace std;
 
     namespace MiniC {
         class Lexer;
@@ -21,14 +17,11 @@
 }
 
 %code top {
-    #include "lexer.h"
-    #include "parser.hpp"
     #include "interpreter.h"
-    #include "location.hh"
     #include "color.h"
     using namespace MiniC;
 
-    static Parser::symbol_type yylex(MiniC::Lexer &lexer, MiniC::Interpreter &driver) {
+    static Parser::symbol_type yylex(Lexer &lexer, Interpreter &driver) {
         return lexer.get_next_token();
     }
 }
@@ -41,7 +34,7 @@
 %define parse.trace
 %define parse.error verbose
 
-%type <Token> Program GlobalDeclarationDefinitionList GlobalDeclarationDefinition Type VariableDeclarationDefinitionList FunctionDefinition VariableDefinition BlockStatement ParameterDelarationList VariableDeclaration ParameterDeclaration Statement StatementList LocalDeclarationDefinition Expression Arguments Identifier
+%type <Token> Program GlobalDeclarationDefinitionList GlobalDeclarationDefinition Type VariableDeclarationDefinitionList FunctionDefinition VariableDefinition BlockStatement ParameterDelarationList VariableDeclaration ParameterDeclaration Statement StatementList LocalDeclarationDefinition Expression CallList ArgumentList IndexList Index Identifier
 
 %token END 0 "EOF"
 %token PUNCTUATOR_PARENTHESIS_LEFT PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT PUNCTUATOR_BRACE_RIGHT PUNCTUATOR_BRACKET_LEFT PUNCTUATOR_BRACKET_RIGHT PUNCTUATOR_SEMICOLON PUNCTUATOR_COMMA
@@ -197,7 +190,9 @@ Statement:
         $$ = Token("IfStatement");
         $$.addChild($3);
         $$.addChild($5);
-        $$.addChild($7);
+        Token elseStatement("ElseStatement");
+        elseStatement.addChild($7);
+        $$.addChild(elseStatement);
     } | KEYWORD_WHILE PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT Statement {
         $$ = Token("WhileStatement");
         $$.addChild($3);
@@ -269,7 +264,7 @@ Expression:
         $$.addChild(Token("Operator", $2));
         $$.addChild($3);
     } | Expression OPERATOR_RELATIONAL Expression {
-        $$ = Token("BinaryExpression");
+        $$ = Token("RelationalExpression");
         $$.addChild($1);
         $$.addChild(Token("Operator", $2));
         $$.addChild($3);
@@ -333,10 +328,14 @@ Expression:
         $$ = Token("PostfixExpression");
         $$.addChild($1);
         $$.addChild(Token("Operator", $2));
-    } | Identifier PUNCTUATOR_PARENTHESIS_LEFT Arguments PUNCTUATOR_PARENTHESIS_RIGHT {
+    } | Identifier CallList {
         $$ = Token("CallExpression");
         $$.addChild($1);
-        $$.addChild($3);
+        $$.addChild($2);
+    } | Identifier IndexList {
+        $$ = Token("IndexExpression");
+        $$.addChild($1);
+        $$.addChild($2);
     } | Identifier {
         $$ = Token("Expression");
         $$.addChild($1);
@@ -346,21 +345,44 @@ Expression:
         $$ = Token("FloatLiteral", $1);
     } | LITERAL_CHAR {
         $$ = Token("CharLiteral", $1);
-    } | LITERAL_STRING{
+    } | LITERAL_STRING {
         $$ = Token("StringLiteral", $1);
     };
-Arguments:
-    Arguments PUNCTUATOR_COMMA Expression {
+CallList:
+    PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
+        $$ = Token("CallList");
+        $$.addChild($2);
+    } | CallList PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
         $$ = $1;
-        $1.addChild($3);
+        $$.addChild($3);
+    }
+ArgumentList:
+    ArgumentList PUNCTUATOR_COMMA Expression {
+        $$ = $1;
+        $$.addChild($3);
     } | Expression {
-        $$ = Token("Arguments");
+        $$ = Token("ArgumentList");
         $$.addChild($1);
     } | {
-        $$ = Token("Arguments");
+        $$ = Token("ArgumentList");
+    };
+IndexList:
+    PUNCTUATOR_BRACKET_LEFT Index PUNCTUATOR_BRACKET_RIGHT {
+        $$ = Token("IndexList");
+        $$.addChild($2);
+    } | IndexList PUNCTUATOR_BRACKET_LEFT Index PUNCTUATOR_BRACKET_RIGHT {
+        $$ = $1;
+        $$.addChild($3);
+    };
+Index:
+    Expression {
+        $$ = Token("Index");
+        $$.addChild($1);
+    } | {
+        $$ = Token("Index");
     };
 %%
 
-void Parser::error(const location &loc , const string &message) {
+void Parser::error(const location &loc, const string &message) {
      cout << RED << "Error: " << message << endl << YELLOW << "Location: " << loc << RESET_COLOR << endl;
 }

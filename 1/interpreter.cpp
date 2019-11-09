@@ -1,7 +1,5 @@
-#include "interpreter.h"
-#include "token.h"
-
 #include <sstream>
+#include "interpreter.h"
 
 using namespace MiniC;
 
@@ -33,8 +31,8 @@ void Interpreter::switchInputStream(istream *is) {
     tokens.clear();
 }
 
-void Interpreter::addToken(const Token &cmd) {
-    tokens.push_back(cmd);
+void Interpreter::addToken(const Token &token) {
+    tokens.push_back(token);
 }
 
 void Interpreter::increaseLocationX(int x) {

@@ -1,12 +1,6 @@
 %{
-    #include "parser.hpp"
-    #include "lexer.h"
     #include "interpreter.h"
-    #include "location.hh"
     #include "color.h"
-    #include <iostream>
-    #include <fstream>
-    using namespace std;
     #define YY_USER_ACTION driver.increaseLocationX(yyleng);
 %}
 %option nodefault
@@ -39,11 +33,11 @@
 \/\/.*\n {
     // cout << "COMMENT_INLINE" << endl;
 }
-[+\-]?[0-9]+[lLuU]? {
+[0-9]+[lLuU]? {
     // cout << "LITERAL_INTEGER" << endl;
 return MiniC::Parser::make_LITERAL_INTEGER(yytext, loc);
 }
-[+\-]?([0-9]*\.[0-9]+)|([0-9]+\.)[lLuU]? {
+([0-9]*\.[0-9]+)|([0-9]+\.)[lLuU]? {
     // cout << "LITERAL_FLOAT" << endl;
 return MiniC::Parser::make_LITERAL_FLOAT(yytext, loc);
 }
@@ -203,12 +197,12 @@ return MiniC::Parser::make_PUNCTUATOR_COMMA(loc);
     // cout << "lineFeed" << endl;
     driver.increaseLocationY(1);
 }
-[ \t] {
+[ \t\v\f] {
     // cout << "whiteSpace" << endl;
 }
 <<EOF>> {
 return MiniC::Parser::make_END(loc);
 }
 . {
-    cout << RED << "Error: unexpected " << yytext << endl << YELLOW << "Location: " << loc << RESET_COLOR << endl;
+    Parser::error(loc, yytext);
 }

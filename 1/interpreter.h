@@ -1,11 +1,7 @@
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
 
-#include <vector>
-
 #include "lexer.h"
-#include "token.h"
-#include "parser.hpp"
 
 namespace MiniC {
     class Interpreter {
@@ -25,7 +21,7 @@ namespace MiniC {
         friend class Lexer;
 
     private:
-        void addToken(const Token &cmd);
+        void addToken(const Token &token);
 
         void increaseLocationX(int x);
 
@@ -33,13 +29,11 @@ namespace MiniC {
 
         MiniC::location &getLocation();
 
-    private:
         Lexer lexer;
         Parser parser;
         vector<Token> tokens;
         MiniC::location loc;
     };
-
 }
 
 #endif // _INTERPRETER_H

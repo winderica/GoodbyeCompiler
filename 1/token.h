@@ -23,6 +23,8 @@ namespace MiniC {
 
         [[nodiscard]] string getName() const;
 
+        [[nodiscard]] string getValue() const;
+
     private:
         string name;
         string value;
