@@ -36,7 +36,7 @@ myInterface.on('line', function (line) {
                 } else if (line.includes('///')) {
                     dest.write('}\n');
                 } else if (line.includes('// return')) {
-                    dest.write(line.replace(/.*\/\/\s/, '') + '\n');
+                    dest.write('    ' + line.replace(/.*\/\/\s/, '') + '\n');
                 } else if (!line.includes('int test') && !line.includes('} // END BODY')) {
                     dest.write(line + '\n');
                 }

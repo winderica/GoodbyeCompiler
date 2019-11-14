@@ -34,27 +34,28 @@
 %define parse.trace
 %define parse.error verbose
 
-%type <Token> Program GlobalDeclarationDefinitionList GlobalDeclarationDefinition Type VariableDeclarationDefinitionList FunctionDefinition VariableDefinition BlockStatement ParameterDelarationList VariableDeclaration ParameterDeclaration Statement StatementList LocalDeclarationDefinition Expression CallList ArgumentList IndexList Index Identifier
+%type <Token> Program GlobalDeclarationDefinitionList GlobalDeclarationDefinition Type VariableList AssignmentExpression BlockStatement ParameterList Parameter Statement StatementList SwitchBobyStatement CaseStatementList CaseStatement DefaultStatement LocalDeclarationDefinition Expression CallExpression ArgumentList IndexExpression Index Assignable Identifier Literal ArrayLiteral ArrayItemList ArrayItem
 
 %token END 0 "EOF"
-%token PUNCTUATOR_PARENTHESIS_LEFT PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT PUNCTUATOR_BRACE_RIGHT PUNCTUATOR_BRACKET_LEFT PUNCTUATOR_BRACKET_RIGHT PUNCTUATOR_SEMICOLON PUNCTUATOR_COMMA
+%token PUNCTUATOR_PARENTHESIS_LEFT PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT PUNCTUATOR_BRACE_RIGHT PUNCTUATOR_BRACKET_LEFT PUNCTUATOR_BRACKET_RIGHT PUNCTUATOR_SEMICOLON PUNCTUATOR_COMMA OPERATOR_QUESTION PUNCTUATOR_COLON
+%token KEYWORD_FOR KEYWORD_IF KEYWORD_ELSE KEYWORD_WHILE KEYWORD_DO KEYWORD_RETURN KEYWORD_BREAK KEYWORD_CONTINUE KEYWORD_SWITCH KEYWORD_DEFAULT KEYWORD_CASE
 %token <string> IDENTIFIER KEYWORD_TYPE LITERAL_FLOAT LITERAL_INTEGER LITERAL_CHAR LITERAL_STRING
 %token <string> OPERATOR_SHIFT_RIGHT OPERATOR_SHIFT_LEFT OPERATOR_BITWISE_AND OPERATOR_BITWISE_OR OPERATOR_BITWISE_XOR OPERATOR_BITWISE_NOT
 %token <string> OPERATOR_LOGICAL_NOT OPERATOR_LOGICAL_AND OPERATOR_LOGICAL_OR
 %token <string> OPERATOR_COMPOUND_ASSIGNMENT OPERATOR_RELATIONAL OPERATOR_ASSIGNMENT
 %token <string> OPERATOR_PLUS OPERATOR_MINUS OPERATOR_MULTIPLY OPERATOR_DIVIDE OPERATOR_MODULUS
 %token <string> OPERATOR_INCREMENT OPERATOR_DECREMENT
-%token KEYWORD_FOR KEYWORD_IF KEYWORD_ELSE KEYWORD_WHILE KEYWORD_RETURN KEYWORD_BREAK KEYWORD_CONTINUE
 
 %left OPERATOR_ASSIGNMENT OPERATOR_COMPOUND_ASSIGNMENT
+%left OPERATOR_QUESTION PUNCTUATOR_COLON
 %left OPERATOR_LOGICAL_OR
 %left OPERATOR_LOGICAL_AND
 %left OPERATOR_BITWISE_OR
 %left OPERATOR_BITWISE_XOR
 %left OPERATOR_BITWISE_AND
 %left OPERATOR_RELATIONAL
-%left OPERATOR_PLUS OPERATOR_MINUS
 %left OPERATOR_SHIFT_RIGHT OPERATOR_SHIFT_LEFT
+%left OPERATOR_PLUS OPERATOR_MINUS
 %left OPERATOR_MULTIPLY OPERATOR_DIVIDE OPERATOR_MODULUS
 
 %right OPERATOR_LOGICAL_NOT OPERATOR_BITWISE_NOT
@@ -84,15 +85,21 @@ GlobalDeclarationDefinitionList:
         $$.addChild($1);
     };
 GlobalDeclarationDefinition:
-    Type VariableDeclarationDefinitionList PUNCTUATOR_SEMICOLON {
-        $$ = Token("GlobalDeclarationDefinition");
+    Type VariableList PUNCTUATOR_SEMICOLON {
+        $$ = Token("GlobalVariableDeclaration");
         $$.addChild($1);
         $$.addChild($2);
-    } | Type FunctionDefinition BlockStatement {
-        $$ = Token("GlobalDeclarationDefinition");
+    } | Type Assignable PUNCTUATOR_PARENTHESIS_LEFT ParameterList PUNCTUATOR_PARENTHESIS_RIGHT BlockStatement {
+        $$ = Token("FunctionDefinition");
         $$.addChild($1);
         $$.addChild($2);
-        $$.addChild($3);
+        $$.addChild($4);
+        $$.addChild($6);
+    } | Type Assignable PUNCTUATOR_PARENTHESIS_LEFT ParameterList PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_SEMICOLON {
+        $$ = Token("FunctionDeclaration");
+        $$.addChild($1);
+        $$.addChild($2);
+        $$.addChild($4);
     } | error PUNCTUATOR_SEMICOLON {
         $$ = Token("ERROR_STATEMENT");
         yyerrok;
@@ -102,78 +109,80 @@ Type:
         const string& value = $1;
         $$ = Token("Type", value);
     };
+Assignable:
+    Identifier {
+        $$ = $1;
+    } | IndexExpression {
+        $$ = $1;
+    };
 Identifier:
     IDENTIFIER {
         $$ = Token("Identifier", $1);
     };
-VariableDeclarationDefinitionList:
-    VariableDeclaration {
-        $$ = Token("VariableDeclarationDefinitionList");
+VariableList:
+    Assignable {
+        $$ = Token("VariableList");
         $$.addChild($1);
-    } | VariableDefinition {
-        $$ = Token("VariableDeclarationDefinitionList");
+    } | AssignmentExpression {
+        $$ = Token("VariableList");
         $$.addChild($1);
-    } | VariableDeclarationDefinitionList PUNCTUATOR_COMMA VariableDeclaration {
+    } | VariableList PUNCTUATOR_COMMA Assignable {
         $$ = $1;
         $$.addChild($3);
-    } | VariableDeclarationDefinitionList PUNCTUATOR_COMMA VariableDefinition {
-        $$ = $1;
-        $$.addChild($3);
-    };
-VariableDeclaration:
-    Identifier {
-        $$ = Token("VariableDeclaration");
-        $$.addChild($1);
-    };
-VariableDefinition:
-    Identifier OPERATOR_ASSIGNMENT Expression {
-        $$ = Token("VariableDefinition");
-        $$.addChild($1);
-        $$.addChild($3);
-    };
-FunctionDefinition:
-    Identifier PUNCTUATOR_PARENTHESIS_LEFT ParameterDelarationList PUNCTUATOR_PARENTHESIS_RIGHT {
-        $$ = Token("FunctionDeclaration");
-        $$.addChild($1);
-        $$.addChild($3);
-    } | Identifier PUNCTUATOR_PARENTHESIS_LEFT PUNCTUATOR_PARENTHESIS_RIGHT {
-        $$ = Token("FunctionDeclaration");
-        $$.addChild($1);
-    };
-ParameterDelarationList:
-    ParameterDeclaration {
-        $$ = Token("ParameterDelarationList");
-        $$.addChild($1);
-    } | ParameterDelarationList PUNCTUATOR_COMMA ParameterDeclaration {
+    } | VariableList PUNCTUATOR_COMMA AssignmentExpression {
         $$ = $1;
         $$.addChild($3);
     };
-ParameterDeclaration:
-    Type VariableDeclaration {
+AssignmentExpression:
+    Assignable OPERATOR_ASSIGNMENT Expression {
+        $$ = Token("AssignmentExpression");
+        $$.addChild($1);
+        $$.addChild(Token("Operator", $2));
+        $$.addChild($3);
+    } | Assignable OPERATOR_ASSIGNMENT ArrayLiteral {
+        $$ = Token("AssignmentExpression");
+        $$.addChild($1);
+        $$.addChild(Token("Operator", $2));
+        $$.addChild($3);
+    };
+ParameterList:
+    ParameterList PUNCTUATOR_COMMA Parameter {
+        $$ = $1;
+        $$.addChild($3);
+    } | Parameter {
+        $$ = Token("ParameterList");
+        $$.addChild($1);
+    } | {
+        $$ = Token("ParameterList");
+    };
+Parameter:
+    Type Assignable {
         $$ = Token("ParameterDeclaration");
         $$.addChild($1);
         $$.addChild($2);
     };
 BlockStatement:
     PUNCTUATOR_BRACE_LEFT StatementList PUNCTUATOR_BRACE_RIGHT {
-        $$ = Token("BlockStatement");
-        $$.addChild($2);
+        $$ = $2;
     } | PUNCTUATOR_BRACE_LEFT PUNCTUATOR_BRACE_RIGHT {
         $$ = Token("BlockStatement");
+    } | error PUNCTUATOR_BRACE_RIGHT {
+        $$ = Token("ERROR_STATEMENT");
+        yyerrok;
     };
 StatementList:
-    Statement {
-        $$ = Token("StatementList");
-        $$.addChild($1);
-    } | StatementList Statement {
+    StatementList Statement {
         $$ = $1;
         $$.addChild($2);
+    } | Statement {
+        $$ = Token("BlockStatement");
+        $$.addChild($1);
     };
 Statement:
-    Expression PUNCTUATOR_SEMICOLON {
-        $$ = Token("ExpressionStatement");
-        $$.addChild($1);
-    } | KEYWORD_RETURN Expression PUNCTUATOR_SEMICOLON {
+    LocalDeclarationDefinition
+      | BlockStatement
+      | Expression PUNCTUATOR_SEMICOLON
+      | KEYWORD_RETURN Expression PUNCTUATOR_SEMICOLON {
         $$ = Token("ReturnStatement");
         $$.addChild($2);
     } | KEYWORD_CONTINUE Expression PUNCTUATOR_SEMICOLON {
@@ -182,6 +191,12 @@ Statement:
     } | KEYWORD_BREAK Expression PUNCTUATOR_SEMICOLON {
         $$ = Token("BreakStatement");
         $$.addChild($2);
+    } | KEYWORD_RETURN PUNCTUATOR_SEMICOLON {
+        $$ = Token("ReturnStatement");
+    } | KEYWORD_CONTINUE PUNCTUATOR_SEMICOLON {
+        $$ = Token("ContinueStatement");
+    } | KEYWORD_BREAK PUNCTUATOR_SEMICOLON {
+        $$ = Token("BreakStatement");
     } | KEYWORD_IF PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT Statement %prec IF_END {
         $$ = Token("IfStatement");
         $$.addChild($3);
@@ -197,37 +212,88 @@ Statement:
         $$ = Token("WhileStatement");
         $$.addChild($3);
         $$.addChild($5);
+    } | KEYWORD_DO Statement KEYWORD_WHILE PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_SEMICOLON {
+        $$ = Token("DoWhileStatement");
+        $$.addChild($2);
+        $$.addChild($5);
+    } | KEYWORD_FOR PUNCTUATOR_PARENTHESIS_LEFT LocalDeclarationDefinition Expression PUNCTUATOR_SEMICOLON Expression PUNCTUATOR_PARENTHESIS_RIGHT Statement {
+        $$ = Token("ForStatement");
+        $$.addChild($3);
+        $$.addChild($4);
+        $$.addChild($6);
+        $$.addChild($8);
     } | KEYWORD_FOR PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_SEMICOLON Expression PUNCTUATOR_SEMICOLON Expression PUNCTUATOR_PARENTHESIS_RIGHT Statement {
         $$ = Token("ForStatement");
         $$.addChild($3);
         $$.addChild($5);
         $$.addChild($7);
         $$.addChild($9);
-    } | LocalDeclarationDefinition {
-        $$ = Token("DeclarationDefinitionStatement");
-        $$.addChild($1);
+    } | KEYWORD_SWITCH PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT SwitchBobyStatement PUNCTUATOR_BRACE_RIGHT {
+        $$ = Token("SwitchStatement");
+        $$.addChild($3);
+        $$.addChild($6);
     } | error PUNCTUATOR_SEMICOLON {
         $$ = Token("ERROR_STATEMENT");
         yyerrok;
-    } | BlockStatement;
-
+    };
+SwitchBobyStatement:
+    CaseStatementList DefaultStatement {
+        $$ = $1;
+        $$.addChild($2);
+    } | CaseStatementList
+      | DefaultStatement {
+        $$ = Token("SwitchBobyStatement");
+        $$.addChild($1);
+    } | {
+        $$ = Token("SwitchBobyStatement");
+    };
+CaseStatementList:
+    CaseStatementList CaseStatement {
+        $$ = $1;
+        $$.addChild($2);
+    } | CaseStatement {
+        $$ = Token("SwitchBobyStatement");
+        $$.addChild($1);
+    };
+CaseStatement:
+    KEYWORD_CASE Expression PUNCTUATOR_COLON StatementList {
+        $$ = Token("CaseStatement");
+        $$.addChild($2);
+        $$.addChild($4);
+    } | KEYWORD_CASE Expression PUNCTUATOR_COLON {
+        $$ = Token("CaseStatement");
+        $$.addChild($2);
+    };
+DefaultStatement:
+    KEYWORD_DEFAULT PUNCTUATOR_COLON StatementList {
+        $$ = Token("DefaultStatement");
+        $$.addChild($3);
+    } | KEYWORD_DEFAULT PUNCTUATOR_COLON {
+        $$ = Token("DefaultStatement");
+    };
 LocalDeclarationDefinition:
-    Type VariableDeclarationDefinitionList PUNCTUATOR_SEMICOLON {
-        $$ = Token("LocalDeclarationDefinition");
+    Type VariableList PUNCTUATOR_SEMICOLON {
+        $$ = Token("LocalVariableDeclaration");
         $$.addChild($1);
         $$.addChild($2);
     };
 Expression:
-    Identifier OPERATOR_ASSIGNMENT Expression {
-        $$ = Token("AssignmentExpression");
-        $$.addChild($1);
-        $$.addChild(Token("Operator", $2));
-        $$.addChild($3);
-    } | Identifier OPERATOR_COMPOUND_ASSIGNMENT Expression {
+    Assignable
+      | Literal
+      | CallExpression
+      | AssignmentExpression
+      | Assignable OPERATOR_COMPOUND_ASSIGNMENT Expression {
         $$ = Token("CompoundAssignmentExpression");
         $$.addChild($1);
         $$.addChild(Token("Operator", $2));
         $$.addChild($3);
+    } | Expression OPERATOR_QUESTION Expression PUNCTUATOR_COLON Expression {
+        $$ = Token("TernaryExpression");
+        $$.addChild($1);
+        $$.addChild(Token("Operator", "?"));
+        $$.addChild($3);
+        $$.addChild(Token("Operator", ":"));
+        $$.addChild($5);
     } | Expression OPERATOR_LOGICAL_AND Expression {
         $$ = Token("BinaryExpression");
         $$.addChild($1);
@@ -328,18 +394,9 @@ Expression:
         $$ = Token("PostfixExpression");
         $$.addChild($1);
         $$.addChild(Token("Operator", $2));
-    } | Identifier CallList {
-        $$ = Token("CallExpression");
-        $$.addChild($1);
-        $$.addChild($2);
-    } | Identifier IndexList {
-        $$ = Token("IndexExpression");
-        $$.addChild($1);
-        $$.addChild($2);
-    } | Identifier {
-        $$ = Token("Expression");
-        $$.addChild($1);
-    } | LITERAL_INTEGER {
+    };
+Literal:
+    LITERAL_INTEGER {
         $$ = Token("IntegerLiteral", $1);
     } | LITERAL_FLOAT {
         $$ = Token("FloatLiteral", $1);
@@ -348,14 +405,31 @@ Expression:
     } | LITERAL_STRING {
         $$ = Token("StringLiteral", $1);
     };
-CallList:
-    PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
-        $$ = Token("CallList");
-        $$.addChild($2);
-    } | CallList PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
+ArrayLiteral:
+    PUNCTUATOR_BRACE_LEFT ArrayItemList PUNCTUATOR_BRACE_RIGHT {
+        $$ = $2;
+    };
+ArrayItemList:
+    ArrayItemList PUNCTUATOR_COMMA ArrayItem {
         $$ = $1;
         $$.addChild($3);
-    }
+    } | ArrayItem {
+        $$ = Token("ArrayLiteral");
+        $$.addChild($1);
+    } | {
+        $$ = Token("ArrayLiteral");
+    };
+ArrayItem:
+    Expression | ArrayLiteral;
+CallExpression:
+    CallExpression PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
+        $$ = $1;
+        $$.addChild($3);
+    } | Assignable PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
+        $$ = Token("CallExpression");
+        $$.addChild($1);
+        $$.addChild($3);
+    };
 ArgumentList:
     ArgumentList PUNCTUATOR_COMMA Expression {
         $$ = $1;
@@ -366,12 +440,13 @@ ArgumentList:
     } | {
         $$ = Token("ArgumentList");
     };
-IndexList:
-    PUNCTUATOR_BRACKET_LEFT Index PUNCTUATOR_BRACKET_RIGHT {
-        $$ = Token("IndexList");
-        $$.addChild($2);
-    } | IndexList PUNCTUATOR_BRACKET_LEFT Index PUNCTUATOR_BRACKET_RIGHT {
+IndexExpression:
+    IndexExpression PUNCTUATOR_BRACKET_LEFT Index PUNCTUATOR_BRACKET_RIGHT {
         $$ = $1;
+        $$.addChild($3);
+    } | Identifier PUNCTUATOR_BRACKET_LEFT Index PUNCTUATOR_BRACKET_RIGHT {
+        $$ = Token("IndexExpression");
+        $$.addChild($1);
         $$.addChild($3);
     };
 Index:

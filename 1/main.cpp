@@ -8,6 +8,6 @@ int main(int argc, char **argv) {
     string divider = string(100, '<');
     cout << "Parse start." << endl << divider << endl;
     int res = interpreter.parse();
-    cout << divider << endl << "Parse complete." << endl;
+    cout << divider << endl << (res ? "Parse failed." : "Parse complete.") << endl;
     return res;
 }

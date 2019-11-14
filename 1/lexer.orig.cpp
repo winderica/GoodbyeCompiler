@@ -18,6 +18,7 @@ int test() {
     // cout << "COMMENT_BLOCK_END" << endl;
     ///
     /// <COMMENT_BLOCK>\n
+    driver.increaseLocationY(1);
     ///
     /// <COMMENT_BLOCK>.
     ///
@@ -25,166 +26,191 @@ int test() {
     // cout << "Unterminated comment" << endl;
     ///
     /// \/\/.*\n
+    driver.increaseLocationY(1);
     // cout << "COMMENT_INLINE" << endl;
     ///
     /// [0-9]+[lLuU]?
-    // cout << "LITERAL_INTEGER" << endl;
+    // cout << "LITERAL_INTEGER" << " " << yytext << endl;
     // return MiniC::Parser::make_LITERAL_INTEGER(yytext, loc);
     ///
     /// ([0-9]*\.[0-9]+)|([0-9]+\.)[lLuU]?
-    // cout << "LITERAL_FLOAT" << endl;
+    // cout << "LITERAL_FLOAT" << " " << yytext << endl;
     // return MiniC::Parser::make_LITERAL_FLOAT(yytext, loc);
     ///
     /// '([^'\\\n]|\\.){0,1}'
-    // cout << "LITERAL_CHAR" << endl;
+    // cout << "LITERAL_CHAR" << " " << yytext << endl;
     // return MiniC::Parser::make_LITERAL_CHAR(yytext, loc);
     ///
     /// \"(\\.|[^"\\])*\"
-    // cout << "LITERAL_STRING" << endl;
+    // cout << "LITERAL_STRING" << " " << yytext << endl;
     // return MiniC::Parser::make_LITERAL_STRING(yytext, loc);
     ///
     /// "int"|"float"|"long"|"char"|"double"|"void"|"short"
-    // cout << "KEYWORD_TYPE" << endl;
+    // cout << "KEYWORD_TYPE" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_TYPE(yytext, loc);
     ///
     /// "return"
-    // cout << "KEYWORD_RETURN" << endl;
+    // cout << "KEYWORD_RETURN" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_RETURN(loc);
     ///
     /// "break"
-    // cout << "KEYWORD_BREAK" << endl;
+    // cout << "KEYWORD_BREAK" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_BREAK(loc);
     ///
     /// "continue"
-    // cout << "KEYWORD_CONTINUE" << endl;
+    // cout << "KEYWORD_CONTINUE" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_CONTINUE(loc);
     ///
     /// "for"
-    // cout << "KEYWORD_FOR" << endl;
+    // cout << "KEYWORD_FOR" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_FOR(loc);
     ///
     /// "if"
-    // cout << "KEYWORD_IF" << endl;
+    // cout << "KEYWORD_IF" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_IF(loc);
     ///
     /// "else"
-    // cout << "KEYWORD_ELSE" << endl;
+    // cout << "KEYWORD_ELSE" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_ELSE(loc);
     ///
     /// "while"
-    // cout << "KEYWORD_WHILE" << endl;
+    // cout << "KEYWORD_WHILE" << " " << yytext << endl;
     // return MiniC::Parser::make_KEYWORD_WHILE(loc);
     ///
+    /// "do"
+    // cout << "KEYWORD_DO" << " " << yytext << endl;
+    // return MiniC::Parser::make_KEYWORD_DO(loc);
+    ///
+    /// "switch"
+    // cout << "KEYWORD_SWITCH" << " " << yytext << endl;
+    // return MiniC::Parser::make_KEYWORD_SWITCH(loc);
+    ///
+    /// "case"
+    // cout << "KEYWORD_CASE" << " " << yytext << endl;
+    // return MiniC::Parser::make_KEYWORD_CASE(loc);
+    ///
+    /// "default"
+    // cout << "KEYWORD_DEFAULT" << " " << yytext << endl;
+    // return MiniC::Parser::make_KEYWORD_DEFAULT(loc);
+    ///
     /// [A-Za-z_][A-Za-z0-9_]*
-    // cout << "IDENTIFIER" << endl;
+    // cout << "IDENTIFIER" << " " << yytext << endl;
     // return MiniC::Parser::make_IDENTIFIER(yytext, loc);
     ///
     /// "+="|"-="|"*="|"/="|"%="|"&="|"|="|"^="|"<<="|">>="
-    // cout << "OPERATOR_COMPOUND_ASSIGNMENT" << endl;
+    // cout << "OPERATOR_COMPOUND_ASSIGNMENT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_COMPOUND_ASSIGNMENT(yytext, loc);
     ///
     /// "++"
-    // cout << "OPERATOR_INCREMENT" << endl;
+    // cout << "OPERATOR_INCREMENT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_INCREMENT(yytext, loc);
     ///
     /// "--"
-    // cout << "OPERATOR_DECREMENT" << endl;
+    // cout << "OPERATOR_DECREMENT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_DECREMENT(yytext, loc);
     ///
     /// ">>"
-    // cout << "OPERATOR_SHIFT_RIGHT" << endl;
+    // cout << "OPERATOR_SHIFT_RIGHT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_SHIFT_RIGHT(yytext, loc);
     ///
     /// "<<"
-    // cout << "OPERATOR_SHIFT_LEFT" << endl;
+    // cout << "OPERATOR_SHIFT_LEFT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_SHIFT_LEFT(yytext, loc);
     ///
     /// ">"|"<"|">="|"<="|"=="|"!="
-    // cout << "OPERATOR_RELATIONAL" << endl;
+    // cout << "OPERATOR_RELATIONAL" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_RELATIONAL(yytext, loc);
     ///
     /// "="
-    // cout << "OPERATOR_ASSIGNMENT" << endl;
+    // cout << "OPERATOR_ASSIGNMENT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_ASSIGNMENT(yytext, loc);
     ///
     /// "+"
-    // cout << "OPERATOR_PLUS" << endl;
+    // cout << "OPERATOR_PLUS" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_PLUS(yytext, loc);
     ///
     /// "-"
-    // cout << "OPERATOR_MINUS" << endl;
+    // cout << "OPERATOR_MINUS" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_MINUS(yytext, loc);
     ///
     /// "*"
-    // cout << "OPERATOR_MULTIPLY" << endl;
+    // cout << "OPERATOR_MULTIPLY" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_MULTIPLY(yytext, loc);
     ///
     /// "/"
-    // cout << "OPERATOR_DIVIDE" << endl;
+    // cout << "OPERATOR_DIVIDE" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_DIVIDE(yytext, loc);
     ///
     /// "%"
-    // cout << "OPERATOR_MODULUS" << endl;
+    // cout << "OPERATOR_MODULUS" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_MODULUS(yytext, loc);
     ///
     /// "&&"
-    // cout << "OPERATOR_LOGICAL_AND" << endl;
+    // cout << "OPERATOR_LOGICAL_AND" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_LOGICAL_AND(yytext, loc);
     ///
     /// "&"
-    // cout << "OPERATOR_BITWISE_AND" << endl;
+    // cout << "OPERATOR_BITWISE_AND" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_BITWISE_AND(yytext, loc);
     ///
     /// "||"
-    // cout << "OPERATOR_LOGICAL_OR" << endl;
+    // cout << "OPERATOR_LOGICAL_OR" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_LOGICAL_OR(yytext, loc);
     ///
     /// "|"
-    // cout << "OPERATOR_BITWISE_OR" << endl;
+    // cout << "OPERATOR_BITWISE_OR" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_BITWISE_OR(yytext, loc);
     ///
     /// "^"
-    // cout << "OPERATOR_BITWISE_XOR" << endl;
+    // cout << "OPERATOR_BITWISE_XOR" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_BITWISE_XOR(yytext, loc);
     ///
     /// "~"
-    // cout << "OPERATOR_BITWISE_NOT" << endl;
+    // cout << "OPERATOR_BITWISE_NOT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_BITWISE_NOT(yytext, loc);
     ///
     /// "!"
-    // cout << "OPERATOR_LOGICAL_NOT" << endl;
+    // cout << "OPERATOR_LOGICAL_NOT" << " " << yytext << endl;
     // return MiniC::Parser::make_OPERATOR_LOGICAL_NOT(yytext, loc);
     ///
+    /// "?"
+    // cout << "OPERATOR_QUESTION" << " " << yytext << endl;
+    // return MiniC::Parser::make_OPERATOR_QUESTION(loc);
+    ///
+    /// ":"
+    // cout << "PUNCTUATOR_COLON" << " " << yytext << endl;
+    // return MiniC::Parser::make_PUNCTUATOR_COLON(loc);
+    ///
     /// "("
-    // cout << "PUNCTUATOR_PARENTHESIS_LEFT" << endl;
+    // cout << "PUNCTUATOR_PARENTHESIS_LEFT" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_PARENTHESIS_LEFT(loc);
     ///
     /// ")"
-    // cout << "PUNCTUATOR_PARENTHESIS_RIGHT" << endl;
+    // cout << "PUNCTUATOR_PARENTHESIS_RIGHT" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_PARENTHESIS_RIGHT(loc);
     ///
     /// "{"
-    // cout << "PUNCTUATOR_BRACE_LEFT" << endl;
+    // cout << "PUNCTUATOR_BRACE_LEFT" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_BRACE_LEFT(loc);
     ///
     /// "}"
-    // cout << "PUNCTUATOR_BRACE_RIGHT" << endl;
+    // cout << "PUNCTUATOR_BRACE_RIGHT" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_BRACE_RIGHT(loc);
     ///
     /// "["
-    // cout << "PUNCTUATOR_BRACKET_LEFT" << endl;
+    // cout << "PUNCTUATOR_BRACKET_LEFT" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_BRACKET_LEFT(loc);
     ///
     /// "]"
-    // cout << "PUNCTUATOR_BRACKET_RIGHT" << endl;
+    // cout << "PUNCTUATOR_BRACKET_RIGHT" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_BRACKET_RIGHT(loc);
     ///
     /// ";"
-    // cout << "PUNCTUATOR_SEMICOLON" << endl;
+    // cout << "PUNCTUATOR_SEMICOLON" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_SEMICOLON(loc);
     ///
     /// ","
-    // cout << "PUNCTUATOR_COMMA" << endl;
+    // cout << "PUNCTUATOR_COMMA" << " " << yytext << endl;
     // return MiniC::Parser::make_PUNCTUATOR_COMMA(loc);
     ///
     /// \n|(\r\n)
