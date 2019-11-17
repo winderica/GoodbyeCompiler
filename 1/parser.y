@@ -34,7 +34,7 @@
 %define parse.trace
 %define parse.error verbose
 
-%type <Token> Program GlobalDeclarationDefinitionList GlobalDeclarationDefinition Type VariableList AssignmentExpression BlockStatement ParameterList Parameter Statement StatementList SwitchBobyStatement CaseStatementList CaseStatement DefaultStatement LocalDeclarationDefinition Expression CallExpression ArgumentList IndexExpression Index Assignable Identifier Literal ArrayLiteral ArrayItemList ArrayItem
+%type <Token> Program GlobalDeclarationDefinitionList GlobalDeclarationDefinition Type VariableList AssignmentExpression BlockStatement ParameterList Parameter Statement StatementList SwitchBodyStatement CaseStatementList CaseStatement DefaultStatement LocalDeclarationDefinition Expression CallExpression ArgumentList IndexExpression Index Assignable Identifier Literal ArrayLiteral ArrayItemList ArrayItem
 
 %token END 0 "EOF"
 %token PUNCTUATOR_PARENTHESIS_LEFT PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT PUNCTUATOR_BRACE_RIGHT PUNCTUATOR_BRACKET_LEFT PUNCTUATOR_BRACKET_RIGHT PUNCTUATOR_SEMICOLON PUNCTUATOR_COMMA OPERATOR_QUESTION PUNCTUATOR_COLON
@@ -228,7 +228,7 @@ Statement:
         $$.addChild($5);
         $$.addChild($7);
         $$.addChild($9);
-    } | KEYWORD_SWITCH PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT SwitchBobyStatement PUNCTUATOR_BRACE_RIGHT {
+    } | KEYWORD_SWITCH PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT PUNCTUATOR_BRACE_LEFT SwitchBodyStatement PUNCTUATOR_BRACE_RIGHT {
         $$ = Token("SwitchStatement");
         $$.addChild($3);
         $$.addChild($6);
@@ -236,23 +236,23 @@ Statement:
         $$ = Token("ERROR_STATEMENT");
         yyerrok;
     };
-SwitchBobyStatement:
+SwitchBodyStatement:
     CaseStatementList DefaultStatement {
         $$ = $1;
         $$.addChild($2);
     } | CaseStatementList
       | DefaultStatement {
-        $$ = Token("SwitchBobyStatement");
+        $$ = Token("SwitchBodyStatement");
         $$.addChild($1);
     } | {
-        $$ = Token("SwitchBobyStatement");
+        $$ = Token("SwitchBodyStatement");
     };
 CaseStatementList:
     CaseStatementList CaseStatement {
         $$ = $1;
         $$.addChild($2);
     } | CaseStatement {
-        $$ = Token("SwitchBobyStatement");
+        $$ = Token("SwitchBodyStatement");
         $$.addChild($1);
     };
 CaseStatement:
