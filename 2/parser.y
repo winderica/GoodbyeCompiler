@@ -186,20 +186,20 @@ Statement:
       | BlockStatement
       | Expression PUNCTUATOR_SEMICOLON
       | KEYWORD_RETURN Expression PUNCTUATOR_SEMICOLON {
-        $$ = Token("ReturnStatement");
+        $$ = Token("ReturnStatement", @1);
         $$.addChild($2);
     } | KEYWORD_CONTINUE Expression PUNCTUATOR_SEMICOLON {
-        $$ = Token("ContinueStatement");
+        $$ = Token("ContinueStatement", @1);
         $$.addChild($2);
     } | KEYWORD_BREAK Expression PUNCTUATOR_SEMICOLON {
-        $$ = Token("BreakStatement");
+        $$ = Token("BreakStatement", @1);
         $$.addChild($2);
     } | KEYWORD_RETURN PUNCTUATOR_SEMICOLON {
-        $$ = Token("ReturnStatement");
+        $$ = Token("ReturnStatement", @1);
     } | KEYWORD_CONTINUE PUNCTUATOR_SEMICOLON {
-        $$ = Token("ContinueStatement");
+        $$ = Token("ContinueStatement", @1);
     } | KEYWORD_BREAK PUNCTUATOR_SEMICOLON {
-        $$ = Token("BreakStatement");
+        $$ = Token("BreakStatement", @1);
     } | KEYWORD_IF PUNCTUATOR_PARENTHESIS_LEFT Expression PUNCTUATOR_PARENTHESIS_RIGHT Statement %prec IF_END {
         $$ = Token("IfStatement");
         $$.addChild($3);
@@ -425,10 +425,11 @@ ArrayItemList:
 ArrayItem:
     Expression | ArrayLiteral;
 CallExpression:
-    CallExpression PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
-        $$ = $1;
-        $$.addChild($3);
-    } | Assignable PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
+//    CallExpression PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
+//        $$ = $1;
+//        $$.addChild($3);
+//    } |
+    Assignable PUNCTUATOR_PARENTHESIS_LEFT ArgumentList PUNCTUATOR_PARENTHESIS_RIGHT {
         $$ = Token("CallExpression");
         $$.addChild($1);
         $$.addChild($3);
@@ -462,5 +463,5 @@ Index:
 %%
 
 void Parser::error(const location &loc, const string &message) {
-     cout << RED << "Error: " << message << endl << YELLOW << "Location: " << loc << RESET_COLOR << endl;
+    driver.addError(message, loc);
 }

@@ -1,12 +1,17 @@
 #include "interpreter.h"
+#include "color.h"
 
 using namespace MiniC;
 
-Interpreter::Interpreter() : tokens(), lexer(*this), parser(lexer, *this), analyzer(), loc(location()) {}
+Interpreter::Interpreter() : tokens(), lexer(*this), parser(lexer, *this), analyzer(*this), loc(location()) {}
 
 int Interpreter::parse() {
+    errors.str("");
     loc.initialize();
-    return parser.parse();
+    auto res = parser.parse();
+    string divider = string(100, '=');
+    cout << divider << endl << "Errors: " << endl << divider << endl << errors.str();
+    return res;
 }
 
 void Interpreter::clear() {
@@ -15,8 +20,12 @@ void Interpreter::clear() {
 }
 
 void Interpreter::analyze() {
+    errors.str("");
+    string divider = string(100, '=');
+    cout << divider << endl << "Symbol table: " << endl << divider << endl;
     for (const auto &token: tokens) {
         analyzer.analyze(token);
+        cout << divider << endl << "Errors: " << endl << divider << endl << errors.str();
     }
 }
 
@@ -52,4 +61,24 @@ void Interpreter::increaseLocationY(int y) {
 
 location &Interpreter::getLocation() {
     return loc;
+}
+
+string Interpreter::makeError(const string &message, const location &location) {
+    stringstream ss;
+    ss << RED << "Error: " << message << endl
+       << YELLOW << "Location: " << location << RESET_COLOR << endl;
+    return ss.str();
+}
+
+void Interpreter::addError(const string &message, const Token &token) {
+    addError(message, token.getLocation().value());
+}
+
+void Interpreter::addError(const string &message, const location &location) {
+    errors << RED << "Error: " << message << endl
+           << YELLOW << "Location: " << location << RESET_COLOR << endl;
+}
+
+void Interpreter::addError(const string &message) {
+    errors << message;
 }

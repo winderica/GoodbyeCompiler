@@ -230,5 +230,5 @@
     return MiniC::Parser::make_END(*loc);
 }
 . {
-    cout << RED << "Error: unexpected " << yytext << endl << YELLOW << "Location: " << *loc << RESET_COLOR << endl;
+    driver.addError("Unexpected " + string(yytext), *loc);
 }

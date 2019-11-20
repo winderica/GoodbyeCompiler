@@ -23,6 +23,8 @@ namespace MiniC {
 
         friend class Lexer;
 
+        friend class SemanticAnalyzer;
+
     private:
         void addToken(const Token &token);
 
@@ -32,11 +34,20 @@ namespace MiniC {
 
         location &getLocation();
 
+        static string makeError(const string &message, const location &location);
+
+        void addError(const string &message, const Token &token);
+
+        void addError(const string &message, const location &location);
+
+        void addError(const string &message);
+
         Lexer lexer;
         Parser parser;
         SemanticAnalyzer analyzer;
         vector<Token> tokens;
         location loc;
+        stringstream errors;
     };
 }
 
