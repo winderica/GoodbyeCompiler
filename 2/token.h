@@ -2,6 +2,8 @@
 #define _TOKEN_H
 
 #include <sstream>
+#include <vector>
+#include <optional>
 #include "location.hh"
 
 using namespace std;

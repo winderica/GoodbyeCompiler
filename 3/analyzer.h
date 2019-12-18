@@ -1,7 +1,6 @@
 #ifndef _ANALYZER_H
 #define _ANALYZER_H
 
-#include <unordered_map>
 #include "symbolTable.h"
 #include "quadruple.h"
 

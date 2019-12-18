@@ -1,6 +1,7 @@
 #ifndef _SYMBOLTABLE_H
 #define _SYMBOLTABLE_H
 
+#include <unordered_map>
 #include "symbol.h"
 
 namespace MiniC {
