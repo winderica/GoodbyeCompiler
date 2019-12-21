@@ -12,11 +12,13 @@ int main(int argc, char **argv) {
     int res = interpreter.parse();
     cout << interpreter.toString() << endl;
     cout << divider << endl << (res ? "Parse failed." : "Parse completed.") << endl << divider << endl;
-    cout << "Analysis started." << endl << divider << endl;
-    interpreter.analyze();
-    cout << "Analysis completed." << endl << divider << endl;
-    cout << "Compilation started." << endl << divider << endl;
-    interpreter.compile();
-    cout << "Compilation completed." << endl << divider << endl;
+    if (!res) {
+        cout << "Analysis started." << endl << divider << endl;
+        interpreter.analyze();
+        cout << "Analysis completed." << endl << divider << endl;
+        cout << "Compilation started." << endl << divider << endl;
+        interpreter.compile();
+        cout << "Compilation completed." << endl << divider << endl;
+    }
     return res;
 }

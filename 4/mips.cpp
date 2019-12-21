@@ -135,9 +135,6 @@ void MIPS::generateText(const vector<Quadruple> &quadruples) {
             if (arg1 == "print_int") {
                 code << "li $v0, 1" << endl
                      << "lw $a0, 0($sp)" << endl
-                     << "syscall" << endl
-                     << "li $v0, 11" << endl
-                     << "li $a0, 10" << endl
                      << "syscall" << endl;
             } else if (arg1 == "read_int") {
                 code << "li $v0, 5" << endl
