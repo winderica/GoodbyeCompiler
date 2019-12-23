@@ -1,7 +1,6 @@
 #ifndef _MIPS_H
 #define _MIPS_H
 
-#include <map>
 #include "analyzer.h"
 
 namespace MiniC {
@@ -38,14 +37,18 @@ namespace MiniC {
                 {"<<", "sll"},
                 {">>", "sra"},
                 {"<",  "slt"},
-                {">", "sgt"},
+                {">",  "sgt"},
                 {"<=", "sle"},
                 {">=", "sge"},
                 {"==", "seq"},
                 {"!=", "sne"},
         };
 
-        map<string, pair<int, int>> offsets;
+        enum offsetType {
+            LOCAL, GLOBAL, ARRAY
+        };
+
+        map<string, pair<int, offsetType>> offsets;
 
         int dataOffset = 0;
 

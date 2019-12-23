@@ -12,10 +12,10 @@ string MIPS::replaceIllegal(const string &str) {
 
 string MIPS::getOffset(const string &identifier) {
     auto offset = offsets[identifier];
-    if (offset.second) { // global or arr
-        return replaceIllegal(identifier);
-    } else { // local
+    if (offset.second == LOCAL) { // local
         return to_string(offset.first * 4) + "($fp)";
+    } else { // global or arr
+        return replaceIllegal(identifier);
     }
 }
 
@@ -26,7 +26,7 @@ bool MIPS::isLiteral(const string &str) {
 string MIPS::load(const string &from, const string &to) {
     if (isLiteral(from)) {
         return "li " + to + ", " + from;
-    } else if (offsets[from].second == 2) {
+    } else if (offsets[from].second == ARRAY) {
         return "la " + to + ", " + getOffset(from);
     }
     return "lw " + to + ", " + getOffset(from);
@@ -36,7 +36,7 @@ string MIPS::save(const string &res, const string &from) {
     if (!isLiteral(res) && res.find('$') == string::npos) {
         code << "sub $sp, $sp, 4" << endl;
         localOffset--;
-        offsets[res] = {localOffset, 0};
+        offsets[res] = {localOffset, LOCAL};
     }
     return "sw " + from + ", " + getOffset(res);
 }
@@ -49,11 +49,11 @@ void MIPS::generateData(const vector<Quadruple> &quadruples) {
         auto arg2 = quadruple.arg2;
         auto res = quadruple.res;
         if (op == "glb") {
-            offsets[res] = {dataOffset, 1};
+            offsets[res] = {dataOffset, GLOBAL};
             dataOffset++;
             data << replaceIllegal(res) << ": .word 0" << endl;
         } else if (op == "arr") {
-            offsets[res] = {dataOffset, 2};
+            offsets[res] = {dataOffset, ARRAY};
             dataOffset += stoi(arg1);
             if (arg2[0] == '"') {
                 data << replaceIllegal(res) << ": .ascii " << arg2 << endl;
@@ -151,10 +151,10 @@ void MIPS::generateText(const vector<Quadruple> &quadruples) {
         } else if (op == "loc") {
             code << "sub $sp, $sp, 4" << endl;
             localOffset--;
-            offsets[res] = {localOffset, 0};
+            offsets[res] = {localOffset, LOCAL};
         } else if (op == "arg") {
             argOffset++;
-            offsets[res] = {argOffset, 0};
+            offsets[res] = {argOffset, LOCAL};
         }
     }
 }
